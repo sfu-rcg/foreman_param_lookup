@@ -10,7 +10,7 @@ module ForemanParamLookup
     def lookup
       case params.keys.first
       when 'name', 'host', 'fqdn'
-        host = Host.find_by_certname params[:name]
+        host = Host.find_by_name params[:name]
         ppclasses = host.puppetclasses + host.hostgroup.puppetclasses
         output(host, ppclasses)
       when 'certname'
