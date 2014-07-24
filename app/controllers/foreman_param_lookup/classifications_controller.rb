@@ -8,15 +8,29 @@ module ForemanParamLookup
     before_filter :set_admin_user, :only => :lookup
 
     def lookup
-      host = Host.find_by_name(params[:host])
-      ppclass = Puppetclass.find_by_name(params[:class])
-      unless host and ppclass
-        head :status => 404
-        return
+      case params.keys.first
+      when 'name', 'host', 'fqdn'
+        host = Host.find_by_certname params[:name]
+        ppclasses = host.puppetclasses + host.hostgroup.puppetclasses
+        output(host, ppclasses)
+      when 'certname'
+        host = Host.find_by_certname params[:certname]
+        ppclasses = host.puppetclasses + host.hostgroup.puppetclasses
+        output(host, ppclasses)
+      when 'mac'
+        host = Host.find_by_mac params[:mac]
+        ppclasses = host.puppetclasses + host.hostgroup.puppetclasses
+        output(host, ppclasses)
+      else
+        render :text => "Valid search keys: name, host, fqdn, certname, mac"
       end
-      render :text => ForemanParamLookup::AnyClassification.new(
-        :host => host, :classes => [ppclass].flatten
-      ).enc.to_yaml
     end
+    
+    private
+      def output(host, ppclasses)
+        render :text => ForemanParamLookup::AnyClassification.new(
+          :host => host, :classes => ppclasses.flatten.compact
+        ).enc.to_yaml
+      end
   end
 end
