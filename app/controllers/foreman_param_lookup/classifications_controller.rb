@@ -9,20 +9,20 @@ module ForemanParamLookup
 
     def lookup
       case params.keys.first
-      when 'host'
-        host = Host.find_by_name params[:host]
+      when 'fqdn'
+        host = Host.find_by_name params[:fqdn]
         ppclasses = host.puppetclasses + host.hostgroup.puppetclasses
         output(host, ppclasses)
-      when 'certname'
-        host = Host.find_by_certname params[:certname]
+      when 'clientcert'
+        host = Host.find_by_certname params[:clientcert]
         ppclasses = host.puppetclasses + host.hostgroup.puppetclasses
         output(host, ppclasses)
-      when 'mac'
-        host = Host.find_by_mac params[:mac]
+      when 'macaddress'
+        host = Host.find_by_mac params[:macaddress]
         ppclasses = host.puppetclasses + host.hostgroup.puppetclasses
         output(host, ppclasses)
       else
-        render :text => "Valid search keys: host, certname, mac"
+        render :text => "Valid search keys: fqdn, clientcert, macaddress"
       end
     end
     
