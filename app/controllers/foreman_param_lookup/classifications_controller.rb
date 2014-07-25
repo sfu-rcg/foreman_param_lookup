@@ -1,6 +1,7 @@
 module ForemanParamLookup
   class ClassificationsController < ::ApplicationController
-    skip_before_filter :require_login, :only => :lookup
+    # Uncomment to allow unauthenticated lookups
+    #skip_before_filter :require_login, :only => :lookup
     skip_before_filter :require_ssl, :only => :lookup
     skip_before_filter :authorize, :only => :lookup
     skip_before_filter :set_taxonomy, :only => :lookup
@@ -11,26 +12,22 @@ module ForemanParamLookup
       case params.keys.first
       when 'fqdn'
         host = Host.find_by_name params[:fqdn]
-        ppclasses = host.puppetclasses + host.hostgroup.puppetclasses
-        output(host, ppclasses)
+        output host, params[:fqdn]
       when 'clientcert'
         host = Host.find_by_certname params[:clientcert]
-        ppclasses = host.puppetclasses + host.hostgroup.puppetclasses
-        output(host, ppclasses)
+        output host, params[:clientcert]
       when 'macaddress'
         host = Host.find_by_mac params[:macaddress]
-        ppclasses = host.puppetclasses + host.hostgroup.puppetclasses
-        output(host, ppclasses)
+        output host, params[:macaddress]
       else
-        render :text => "Valid search keys: fqdn, clientcert, macaddress"
+        render :text => "Valid search keys: fqdn, clientcert, macaddress", :status => 400
       end
     end
-    
+
     private
-      def output(host, ppclasses)
-        render :text => ForemanParamLookup::AnyClassification.new(
-          :host => host, :classes => ppclasses.flatten.compact
-        ).enc.to_yaml
+      def output(host, lookup)
+        return render :text => "No host was returned for #{lookup}", :status => 404 if host.nil?
+        render :text => Classification::ClassParam.new(:host => host).enc.to_yaml
       end
   end
 end
