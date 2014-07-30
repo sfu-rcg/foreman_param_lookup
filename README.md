@@ -1,32 +1,14 @@
 # foreman_param_lookup
 
-Foreman engine plugin that exposes smart class parameter lookups for any host
-and class.
-
-The ENC YAML output that Foreman generates only provides parameters for classes
-that are included on the node through the host or hostgroup records.  However
-any smart class parameter can be evaluated for a host, so this exposes an API
-to do that.
-
-It's designed to be used with the `foreman_data_binding` Puppet module, which
-uses this API to resolve class parameters using the matchers configured in
-Foreman.  It effectively works in the same way as the Hiera integration in
-Puppet 3.
-
-Get the foreman_data_binding module from [Puppet Forge](http://forge.puppetlabs.com/domcleal/foreman_data_binding)
-or [GitHub](https://github.com/domcleal/foreman_data_binding).
+Foreman engine plugin that can lookup all assigned class parameters for a host. You can search for hosts by fqdn, certificate name, or MAC address.
 
 # Installation:
 
 Include in your `~foreman/bundler.d/foreman_param_lookup.rb`
 
-    gem 'foreman_param_lookup'
+    gem 'foreman_param_lookup', :git => "https://github.com/sfu-rcg/foreman_param_lookup.git"
 
-Or from git:
-
-    gem 'foreman_param_lookup', :git => "https://github.com/domcleal/foreman_param_lookup.git"
-
-As Foreman user:
+As the Foreman user:
 
     bundle install
 
@@ -34,23 +16,54 @@ To upgrade to newest version of the plugin:
 
     bundle update foreman_param_lookup
 
-Don't forget to install the Puppet module to use that functionality.
-
 # Usage
 
-The URL requires the host (that will be used as context for the smart class
-parameter lookup) and the class.  It'll return all parameters for the class in
-YAML format.
+The URL structure requires one of the following parameter keys to be specified: fqdn, clientcert, or macaddress, along with the appropriate value for the host you're trying to find.  
 
-    $ curl http://foreman/param_lookup?host=host.example.net&class=module::class
-    --- 
-      module::class: 
-        param1: value
-        param2: "another value"
+```bash
+$ curl http://foreman.domain.com/param_lookup?fqdn=host.example.net
+--- 
+  module::class: 
+    param1: value
+    param2: "another value"
+    
+$ curl http://foreman.domain.com/param_lookup?clientcert=myhostcert.example.net
+--- 
+  module::class: 
+    param1: value
+    param2: "another value"
+    
+$ curl http://foreman.domain.com/param_lookup?macaddress=00:50:56:42:28:n2
+--- 
+  module::class: 
+    param1: value
+    param2: "another value"
+```
+
+It will return 200 on a successful search, 400 when you use a wrong parameter key, and 404 when a host isn't found.
 
 # Copyright
 
-Copyright (c) 2013 Red Hat Inc.
+Original credit & copyright goes to [Dominic Cleal, and Red Hat Inc.](https://github.com/domcleal/foreman_param_lookup), respectively.
+
+Modifications made by Riley Shott in July, 2014.
+
+Copyright (c) 2014 Simon Fraser University
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Copyright (c) 2012-2013 Red Hat Inc.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
