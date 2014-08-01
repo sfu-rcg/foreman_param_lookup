@@ -1,7 +1,6 @@
 module ForemanParamLookup
   class ClassificationsController < ::ApplicationController
-    # Uncomment to allow unauthenticated lookups
-    #skip_before_filter :require_login, :only => :lookup
+    skip_before_filter :require_login, :only => :lookup
     skip_before_filter :require_ssl, :only => :lookup
     skip_before_filter :authorize, :only => :lookup
     skip_before_filter :set_taxonomy, :only => :lookup
