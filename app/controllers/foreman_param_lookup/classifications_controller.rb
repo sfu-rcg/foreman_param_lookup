@@ -1,11 +1,5 @@
 module ForemanParamLookup
   class ClassificationsController < ::ApplicationController
-    skip_before_filter :require_login, :only => :lookup
-    skip_before_filter :require_ssl, :only => :lookup
-    skip_before_filter :authorize, :only => :lookup
-    skip_before_filter :set_taxonomy, :only => :lookup
-    skip_before_filter :session_expiry, :update_activity_time, :only => :lookup
-    before_filter :set_admin_user, :only => :lookup
 
     def lookup
       case params.keys.first
