@@ -1,11 +1,5 @@
 module ForemanParamLookup
   class ClassificationsController < ::ApplicationController
-    skip_before_filter :require_login, :only => :lookup
-    skip_before_filter :require_ssl, :only => :lookup
-    skip_before_filter :authorize, :only => :lookup
-    skip_before_filter :set_taxonomy, :only => :lookup
-    skip_before_filter :session_expiry, :update_activity_time, :only => :lookup
-    before_filter :set_admin_user, :only => :lookup
 
     def lookup
       case params.keys.first
@@ -14,6 +8,14 @@ module ForemanParamLookup
         output host, params[:fqdn]
       when 'clientcert'
         host = Host.find_by_certname params[:clientcert]
+        if host.nil?
+          host = Host.find_by_name params[:clientcert]
+          # Be safe, return nil if we found a host with a maching name, but its
+          # certname value isn't nil
+          # The .certname method in Host::Managed is being overriden
+          # to a return a host's hostname if its certname is nil
+          host = nil unless host.send(:read_attribute, :certname) == nil
+        end
         output host, params[:clientcert]
       when 'macaddress'
         host = Host.find_by_mac params[:macaddress]
